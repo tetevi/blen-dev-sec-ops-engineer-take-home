@@ -47,6 +47,20 @@ BLEN DevSecOps Engineer Take-Home: Secure Three-Tier Architecture
 - DB credentials in Secrets Manager, never hardcoded
 - All CI pipelines include checkov, hadolint, Trivy, and gitleaks
 
+### Terraform Validation
+
+terraform init -backend=false
+<img width="906" height="594" alt="image" src="https://github.com/user-attachments/assets/7dd88328-5571-4c56-bfc9-0d4818d8d907" />
+
+terraform fmt -check
+<img width="916" height="67" alt="image" src="https://github.com/user-attachments/assets/0e181b92-a49f-4a86-9432-d7e994c668a8" />
+
+terraform validate
+<img width="949" height="109" alt="image" src="https://github.com/user-attachments/assets/589b7742-fe09-497b-bdae-3adb2853ec08" />
+
+tflint 
+<img width="589" height="38" alt="image" src="https://github.com/user-attachments/assets/38e5fe25-f9cf-4f2c-9c3c-31975f8b50ff" />
+
 ## Checkov Skips (with justification)
 
 | Check | Resource | Reason |
@@ -85,21 +99,5 @@ curl localhost:3000/api/db-check
 
 ## Running Locally
 <img width="827" height="467" alt="image" src="https://github.com/user-attachments/assets/5289cd42-eb81-4da3-9c68-50da01fd895f" />
-
-### Terraform Validation
-
-terraform init -backend=false
-<img width="906" height="594" alt="image" src="https://github.com/user-attachments/assets/7dd88328-5571-4c56-bfc9-0d4818d8d907" />
-
-terraform fmt -check
-<img width="916" height="67" alt="image" src="https://github.com/user-attachments/assets/0e181b92-a49f-4a86-9432-d7e994c668a8" />
-
-terraform validate
-<img width="949" height="109" alt="image" src="https://github.com/user-attachments/assets/589b7742-fe09-497b-bdae-3adb2853ec08" />
-
-tflint 
-<img width="589" height="38" alt="image" src="https://github.com/user-attachments/assets/38e5fe25-f9cf-4f2c-9c3c-31975f8b50ff" />
-
-
 
 
