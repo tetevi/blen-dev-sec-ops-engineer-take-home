@@ -3,25 +3,26 @@
 BLEN DevSecOps Engineer Take-Home: Secure Three-Tier Architecture
 
 ## Project Structure
-
+```
 /
-├── terraform/              # Modular Terraform configuration
-│   ├── main.tf             # Root module wiring
+├── terraform/
+│   ├── main.tf
 │   ├── variables.tf
 │   ├── outputs.tf
 │   ├── providers.tf
 │   ├── versions.tf
 │   └── modules/
-│       ├── networking/     # VPC, subnets, IGW, NAT GW, route tables
-│       ├── database/       # RDS PostgreSQL, Secrets Manager
-│       ├── ecs/            # ECS Fargate, IAM roles, task definition
-│       └── alb/            # ALB, target group, listeners
-├── app/                    # Next.js application (provided)
-├── docker-compose.yml      # Local proof-of-life
+│       ├── networking/
+│       ├── database/
+│       ├── ecs/
+│       └── alb/
+├── app/
+├── docker-compose.yml
 ├── .github/workflows/
-│   ├── pr.yml              # PR checks pipeline
-│   └── merge.yml           # Merge + GHCR publish pipeline
+│   ├── pr.yml
+│   └── merge.yml
 └── README.md
+```
 
 ## Architecture Decisions
 
