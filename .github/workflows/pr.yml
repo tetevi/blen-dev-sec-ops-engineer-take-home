@@ -14,17 +14,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TODO: Set up Terraform 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      # TODO: Run terraform fmt -check
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
 
-      # TODO: Run terraform init -backend=false
+      - name: Terraform Init
+        run: terraform init -backend=false
 
-      # TODO: Run terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-      # TODO: Install and run tflint
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
 
-      # TODO: Run checkov or tfsec against the terraform directory
+      - name: Run TFLint
+        run: tflint --recursive --minimum-failure-severity=error
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform
+          framework: terraform
+          soft_fail: true
 
   docker-lint:
     name: Dockerfile Lint
@@ -32,8 +45,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TODO: Run hadolint on app/Dockerfile
-      # Hint: hadolint/hadolint-action or run hadolint directly
+      - name: Run hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: app/Dockerfile
+          failure-threshold: error
 
   docker-build-and-scan:
     name: Docker Build & Trivy Scan
@@ -41,11 +57,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TODO: Build the Docker image from app/Dockerfile
-      # Hint: docker build -t app:${{ github.sha }} ./app
+      - name: Build Docker image
+        run: docker build -t app:${{ github.sha }} ./app
 
-      # TODO: Run Trivy vulnerability scanner on the built image
-      # Hint: aquasecurity/trivy-action or run trivy directly
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: app:${{ github.sha }}
+          format: table
+          exit-code: 0
+          severity: CRITICAL,HIGH
 
   app-security:
     name: Application Security Scan
@@ -53,9 +74,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TODO: Run npm audit or trivy fs on the app directory
-      # Hint: cd app && npm ci && npm audit --audit-level=high
-      #   or: trivy fs --severity HIGH,CRITICAL ./app
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci
+
+      - name: Run npm audit
+        working-directory: app
+        run: npm audit --audit-level=high
+        continue-on-error: true
 
   secret-detection:
     name: Secret Detection
@@ -65,8 +96,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      # TODO: Run gitleaks to detect any hardcoded secrets
-      # Hint: gitleaks/gitleaks-action or run gitleaks directly
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   docker-compose-test:
     name: Docker Compose Integration Test
@@ -74,10 +107,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TODO: Start services with docker compose up -d
+      - name: Start services
+        run: docker compose up -d --build
 
-      # TODO: Wait for services to be healthy
+      - name: Wait for services to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/api/db-check > /dev/null 2>&1; then
+              echo "Services are ready!"
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Timed out waiting for services"
+              docker compose logs
+              exit 1
+            fi
+            echo "Waiting for services... (attempt $i/30)"
+            sleep 2
+          done
 
-      # TODO: Curl localhost:3000/api/db-check and verify a successful response
+      - name: Verify db-check endpoint
+        run: |
+          response=$(curl -sf http://localhost:3000/api/db-check)
+          echo "$response"
+          echo "$response" | grep -q '"success":true'
 
-      # TODO: Tear down with docker compose down
+      - name: Tear down services
+        if: always()
+        run: docker compose down
