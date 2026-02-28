@@ -61,6 +61,9 @@ BLEN DevSecOps Engineer Take-Home: Secure Three-Tier Architecture
 | CKV2_AWS_30 | RDS | Query logging via parameter group out of scope |
 | CKV2_AWS_57 | Secrets Manager | Secret rotation requires Lambda, out of scope |
 
+<img width="975" height="565" alt="image" src="https://github.com/user-attachments/assets/cd012686-c6cb-4f7f-be86-cffa933cf016" />
+
+
 ## Local Proof-of-Life
 
 docker compose up builds the Next.js app and PostgreSQL database. Verified with:
