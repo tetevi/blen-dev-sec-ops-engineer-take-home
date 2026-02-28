@@ -87,7 +87,7 @@ curl localhost:3000/api/db-check
 <img width="827" height="467" alt="image" src="https://github.com/user-attachments/assets/5289cd42-eb81-4da3-9c68-50da01fd895f" />
 
 ### Terraform Validation
-```
+
 terraform init -backend=false
 <img width="906" height="594" alt="image" src="https://github.com/user-attachments/assets/7dd88328-5571-4c56-bfc9-0d4818d8d907" />
 
@@ -100,6 +100,6 @@ terraform validate
 tflint 
 <img width="589" height="38" alt="image" src="https://github.com/user-attachments/assets/38e5fe25-f9cf-4f2c-9c3c-31975f8b50ff" />
 
-```
+
 
 
