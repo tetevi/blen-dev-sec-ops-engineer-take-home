@@ -1,47 +1,93 @@
-# BLEN Engineering Take-Home Challenge
+# Secure Three-Tier AWS Architecture
 
-Welcome to the BLEN Engineering Take-Home Challenge repository. This challenge is designed to assess candidates' skills in infrastructure-as-code, networking, security scanning, containerization, and CI/CD -- all at **zero cost** with no AWS account required.
+BLEN DevSecOps Engineer Take-Home: Secure Three-Tier Architecture
 
-## Challenge
+## Project Structure
 
-**DevSecOps Engineer: Secure Three-Tier Architecture on AWS (Zero-Cost Validation)**
-- [Challenge Instructions](challenge.md)
-- Focus: Terraform design, network security, IaC/container scanning, Docker Compose, and GitHub Actions CI/CD
+/
+├── terraform/              # Modular Terraform configuration
+│   ├── main.tf             # Root module wiring
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── providers.tf
+│   ├── versions.tf
+│   └── modules/
+│       ├── networking/     # VPC, subnets, IGW, NAT GW, route tables
+│       ├── database/       # RDS PostgreSQL, Secrets Manager
+│       ├── ecs/            # ECS Fargate, IAM roles, task definition
+│       └── alb/            # ALB, target group, listeners
+├── app/                    # Next.js application (provided)
+├── docker-compose.yml      # Local proof-of-life
+├── .github/workflows/
+│   ├── pr.yml              # PR checks pipeline
+│   └── merge.yml           # Merge + GHCR publish pipeline
+└── README.md
 
-### Key Requirement: Zero AWS Cost
+## Architecture Decisions
 
-Candidates write real Terraform for a full three-tier AWS architecture but validate everything **locally** with `terraform validate`, `tflint`, and `checkov`/`tfsec`. No `terraform apply` is ever run. Docker Compose proves the app works. GitHub Actions (free on public repos) handles CI/CD with security scanning. GHCR (free) replaces ECR for container image storage.
+- **Modular Terraform**: Split into networking, database, ecs, and alb modules for reusability and separation of concerns.
+- **Security group wiring**: Created empty security groups in the root module and passed IDs into each module. Rules are attached via aws_security_group_rule resources. This avoids circular dependencies between ALB, ECS, and RDS.
+- **Three subnet tiers**: Public (ALB, NAT GW), private (ECS Fargate), and isolated (RDS). Isolated subnets have no route to the internet.
+- **Dual NAT Gateways**: One per AZ for high availability. If one AZ goes down, the other still has outbound internet access.
+- **Multi-AZ RDS**: Primary and standby in separate AZs for failover.
+- **Secrets Manager**: DB credentials stored in Secrets Manager and injected into ECS tasks at runtime. No hardcoded secrets.
 
-### What Candidates Will Build
+## Security Considerations
 
-1. **Terraform** - Full three-tier AWS architecture (VPC, subnets, RDS, ECS Fargate, ALB) validated locally with linters and security scanners
-2. **Docker Compose** - Local proof-of-life showing the Next.js app connected to PostgreSQL
-3. **GitHub Actions CI/CD** - PR and merge workflows with Terraform checks, Trivy container scanning, hadolint, gitleaks secret detection, and GHCR image publishing
-4. **Security Posture** - IaC scanning, container scanning, secret detection, and a security checklist
+- RDS is in isolated subnets with no internet access and publicly_accessible = false
+- RDS storage encryption enabled
+- IAM database authentication enabled
+- Security groups follow least-privilege: each tier only accepts traffic from the tier above it on the required port
+- ECS tasks run in private subnets, outbound only via NAT GW
+- ALB drops invalid header fields
+- HTTP listener redirects to HTTPS (no plaintext traffic served)
+- VPC flow logging enabled
+- Default VPC security group restricts all traffic
+- DB credentials in Secrets Manager, never hardcoded
+- All CI pipelines include checkov, hadolint, Trivy, and gitleaks
 
-## Provided Resources
+## Checkov Skips (with justification)
 
-The repository includes:
+| Check | Resource | Reason |
+|-------|----------|--------|
+| CKV_AWS_260 | ALB HTTP ingress | HTTP listener used solely for HTTPS redirect |
+| CKV_AWS_91 | ALB | Access logs require S3 bucket, out of scope |
+| CKV_AWS_150 | ALB | Deletion protection disabled for assessment |
+| CKV_AWS_149 | Secrets Manager | Default AWS encryption sufficient, KMS CMK out of scope |
+| CKV_AWS_293 | RDS | Deletion protection disabled for assessment |
+| CKV_AWS_158 | CloudWatch Logs | KMS encryption for log groups out of scope |
+| CKV2_AWS_28 | ALB | WAF out of scope |
+| CKV2_AWS_30 | RDS | Query logging via parameter group out of scope |
+| CKV2_AWS_57 | Secrets Manager | Secret rotation requires Lambda, out of scope |
 
-- **`app/`** - A pre-built Next.js application with a Dockerfile and database connectivity check (no modifications required)
-- **`.github/workflows/pr.yml`** - Skeleton PR workflow with TODO placeholders for each CI job
-- **`.github/workflows/merge.yml`** - Skeleton merge workflow with TODO placeholders, including GHCR publishing
-- **`challenge.md`** - Complete challenge instructions with evaluation rubric
+## Local Proof-of-Life
 
-> The Dockerfile is intentionally imperfect (runs as root, single-stage build). Candidates who run hadolint and Trivy will discover issues and can fix them for bonus points.
+docker compose up builds the Next.js app and PostgreSQL database. Verified with:
+```
+curl localhost:3000/api/db-check
+```
 
-## How to Use This Repository
+### Docker Compose Up
 
-**Candidates:**
-1. Click **"Use this template"** to create your own copy (must be **public**). Do **not** fork.
-2. Read the [challenge instructions](challenge.md) thoroughly
-3. Implement your solution in your repo
-4. Update your README with architecture decisions, security considerations, and proof-of-life output
-5. Submit the link to your repository to your BLEN recruiting contact
 
-## General Guidelines
+### DB Check Response
 
-- All infrastructure must be defined with Terraform (validated locally, never applied)
-- Code quality, documentation, and the ability to explain your solution are important
-- Prioritize security and proper network segmentation
-- Time management is crucial; focus on core requirements before bonus features
+
+## Running Locally
+
+### Terraform Validation
+```
+cd terraform
+terraform init -backend=false
+terraform fmt -check -recursive
+terraform validate
+tflint --recursive
+checkov -d .
+```
+
+### Docker Compose
+```
+docker compose up --build -d
+curl localhost:3000/api/db-check
+docker compose down
+```
