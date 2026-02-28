@@ -83,19 +83,11 @@ tflint
 docker compose up builds the Next.js app and PostgreSQL database. Verified with:
 <img width="975" height="673" alt="image" src="https://github.com/user-attachments/assets/f9e2c49b-5ee6-4776-9d4c-dcb01f92e79f" />
 
-
-```
-curl localhost:3000/api/db-check
-```
-
 ### Docker Compose Up
 <img width="975" height="252" alt="image" src="https://github.com/user-attachments/assets/e4f0afbf-5468-4a88-8cac-f2a62c9cb37d" />
 
-
-
 ### DB Check Response
 <img width="849" height="88" alt="image" src="https://github.com/user-attachments/assets/ab239b10-4aaf-458d-b273-2f76f4e71744" />
-
 
 ## Running Locally
 <img width="827" height="467" alt="image" src="https://github.com/user-attachments/assets/5289cd42-eb81-4da3-9c68-50da01fd895f" />
