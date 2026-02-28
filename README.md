@@ -67,31 +67,39 @@ BLEN DevSecOps Engineer Take-Home: Secure Three-Tier Architecture
 ## Local Proof-of-Life
 
 docker compose up builds the Next.js app and PostgreSQL database. Verified with:
+<img width="975" height="673" alt="image" src="https://github.com/user-attachments/assets/f9e2c49b-5ee6-4776-9d4c-dcb01f92e79f" />
+
+
 ```
 curl localhost:3000/api/db-check
 ```
 
 ### Docker Compose Up
+<img width="975" height="252" alt="image" src="https://github.com/user-attachments/assets/e4f0afbf-5468-4a88-8cac-f2a62c9cb37d" />
+
 
 
 ### DB Check Response
+<img width="849" height="88" alt="image" src="https://github.com/user-attachments/assets/ab239b10-4aaf-458d-b273-2f76f4e71744" />
 
 
 ## Running Locally
+<img width="827" height="467" alt="image" src="https://github.com/user-attachments/assets/5289cd42-eb81-4da3-9c68-50da01fd895f" />
 
 ### Terraform Validation
 ```
-cd terraform
 terraform init -backend=false
-terraform fmt -check -recursive
+<img width="906" height="594" alt="image" src="https://github.com/user-attachments/assets/7dd88328-5571-4c56-bfc9-0d4818d8d907" />
+
+terraform fmt -check
+<img width="916" height="67" alt="image" src="https://github.com/user-attachments/assets/0e181b92-a49f-4a86-9432-d7e994c668a8" />
+
 terraform validate
-tflint --recursive
-checkov -d .
+<img width="949" height="109" alt="image" src="https://github.com/user-attachments/assets/589b7742-fe09-497b-bdae-3adb2853ec08" />
+
+tflint 
+<img width="589" height="38" alt="image" src="https://github.com/user-attachments/assets/38e5fe25-f9cf-4f2c-9c3c-31975f8b50ff" />
+
 ```
 
-### Docker Compose
-```
-docker compose up --build -d
-curl localhost:3000/api/db-check
-docker compose down
-```
+
